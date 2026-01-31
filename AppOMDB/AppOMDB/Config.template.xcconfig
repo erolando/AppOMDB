@@ -1,0 +1,10 @@
+//
+//  Config.xcconfig
+//  AppOMDB
+//
+//  Created by Rolando Avila on 31/01/26.
+//
+
+OMDB_API_KEY = 7be98d2c
+
+// Important: Not upload apiKey to github, best practices create a Config file with empty values.
