@@ -68,9 +68,9 @@ final class MovieTableViewCell: UITableViewCell {
         ])
     }
     
-    func configure(with movie: String) {
-        titleLabel.text = movie
-        yearLabel.text = movie
+    func configure(with movie: Movie) {
+        titleLabel.text = movie.title
+        yearLabel.text = movie.year
         posterView.image = UIImage(systemName: "film")
     }
 }

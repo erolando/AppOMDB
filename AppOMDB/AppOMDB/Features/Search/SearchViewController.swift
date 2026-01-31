@@ -24,6 +24,12 @@ final class SearchViewController: UIViewController {
         tv.keyboardDismissMode = .onDrag
         return tv
     }()
+    
+    private let contentStateView: ContentStateView = {
+        let v = ContentStateView()
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
 
     private let viewModel: SearchViewModel
 
@@ -41,7 +47,15 @@ final class SearchViewController: UIViewController {
         super.viewDidLoad()
         title = "OMDB Movies"
         view.backgroundColor = .systemBackground
+        setupSearchBar()
         setupTableView()
+        view.addSubview(contentStateView)
+        NSLayoutConstraint.activate([
+            contentStateView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            contentStateView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            contentStateView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
+            contentStateView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+        ])
         
         viewModel.onStateDidChange = { [weak self] state in
             self?.updateUI(state: state)
@@ -49,10 +63,24 @@ final class SearchViewController: UIViewController {
         updateUI(state: viewModel.state)
     }
 
+    private func setupSearchBar() {
+        view.addSubview(searchBar)
+        NSLayoutConstraint.activate([
+            searchBar.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            searchBar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            searchBar.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+        ])
+        searchBar.delegate = self
+    }
+
     private func setupTableView() {
         view.addSubview(tableView)
+        
+        searchBar.sizeToFit()
+        tableView.tableHeaderView = searchBar
+        
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.topAnchor),
+            tableView.topAnchor.constraint(equalTo: searchBar.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
@@ -66,6 +94,22 @@ final class SearchViewController: UIViewController {
     private func updateUI(state: SearchState) {
         switch state {
         case .idle:
+            tableView.isHidden = false
+            tableView.reloadData()
+        case .loading:
+            contentStateView.state = .loading
+            tableView.isHidden = false
+            tableView.reloadData()
+        case .results:
+            contentStateView.state = .hidden
+            tableView.isHidden = false
+            tableView.reloadData()
+        case .empty:
+            contentStateView.state = .empty(message: "No se encontraron películas. Prueba otro término.")
+            tableView.isHidden = false
+            tableView.reloadData()
+        case .error(let text):
+            contentStateView.state = .error(message: text)
             tableView.isHidden = false
             tableView.reloadData()
         }
@@ -90,5 +134,16 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
         let _ = viewModel.movies[indexPath.row]
         let detailVC = DetailMovieViewController()
         navigationController?.pushViewController(detailVC, animated: true)
+    }
+}
+
+extension SearchViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.resignFirstResponder()
+        viewModel.search(query: searchBar.text ?? "")
+    }
+
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {        
+        viewModel.search(query: searchBar.text ?? "")
     }
 }
