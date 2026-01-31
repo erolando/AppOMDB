@@ -88,7 +88,7 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let _ = viewModel.movies[indexPath.row]
-        let detailVC = UIViewController() // FIXME: Pending
+        let detailVC = DetailMovieViewController()
         navigationController?.pushViewController(detailVC, animated: true)
     }
 }

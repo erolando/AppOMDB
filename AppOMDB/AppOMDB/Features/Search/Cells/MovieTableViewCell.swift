@@ -12,6 +12,7 @@ final class MovieTableViewCell: UITableViewCell {
     private let posterView: UIImageView = {
         let v = UIImageView()
         v.translatesAutoresizingMaskIntoConstraints = false
+        v.contentMode = .scaleAspectFit
         v.layer.cornerRadius = 8
         v.clipsToBounds = true
         return v
@@ -70,6 +71,6 @@ final class MovieTableViewCell: UITableViewCell {
     func configure(with movie: String) {
         titleLabel.text = movie
         yearLabel.text = movie
-        posterView.image = nil
+        posterView.image = UIImage(systemName: "film")
     }
 }
