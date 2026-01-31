@@ -75,12 +75,8 @@ final class SearchViewController: UIViewController {
 
     private func setupTableView() {
         view.addSubview(tableView)
-        
-        searchBar.sizeToFit()
-        tableView.tableHeaderView = searchBar
-        
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: searchBar.topAnchor),
+            tableView.topAnchor.constraint(equalTo: searchBar.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
@@ -131,8 +127,8 @@ extension SearchViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let _ = viewModel.movies[indexPath.row]
-        let detailVC = DetailMovieViewController()
+        let movie = viewModel.movies[indexPath.row]
+        let detailVC = DetailMovieViewController(imdbID: movie.imdbID)
         navigationController?.pushViewController(detailVC, animated: true)
     }
 }
@@ -143,7 +139,7 @@ extension SearchViewController: UISearchBarDelegate {
         viewModel.search(query: searchBar.text ?? "")
     }
 
-    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {        
-        viewModel.search(query: searchBar.text ?? "")
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        viewModel.scheduleSearch(query: searchText)
     }
 }

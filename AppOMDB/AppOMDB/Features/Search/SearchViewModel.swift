@@ -16,10 +16,13 @@ enum SearchState {
 
 final class SearchViewModel {
     
-    let movieRepository: MoviesRepositoryProtocol
+    private let movieRepository: MoviesRepositoryProtocol
+    private let debouncer: Debouncer
     
-    init(movieRepository: MoviesRepositoryProtocol = MoviesRepository()) {
+    init(movieRepository: MoviesRepositoryProtocol = MoviesRepository(),
+         debouncer: Debouncer = Debouncer(interval: 0.4)) {
         self.movieRepository = movieRepository
+        self.debouncer = debouncer
     }
 
     var onStateDidChange: ((SearchState) -> Void)?
@@ -53,6 +56,12 @@ final class SearchViewModel {
             case .failure(let err):
                 self.state = .error(err.localizedDescription)
             }
+        }
+    }
+    
+    func scheduleSearch(query: String) {
+        debouncer.schedule { [weak self] in
+            self?.search(query: query)
         }
     }
 }

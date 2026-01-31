@@ -9,8 +9,9 @@ import UIKit
 final class MovieTableViewCell: UITableViewCell {
     static let reuseIdentifier = "MovieTableViewCell"
 
-    private let posterView: UIImageView = {
-        let v = UIImageView()
+    private let posterView: AsyncImageView = {
+        let v = AsyncImageView()
+        v.imageContentMode = .scaleAspectFit
         v.translatesAutoresizingMaskIntoConstraints = false
         v.contentMode = .scaleAspectFit
         v.layer.cornerRadius = 8
@@ -71,6 +72,6 @@ final class MovieTableViewCell: UITableViewCell {
     func configure(with movie: Movie) {
         titleLabel.text = movie.title
         yearLabel.text = movie.year
-        posterView.image = UIImage(systemName: "film")
+        posterView.loadImage(from: movie.poster)
     }
 }

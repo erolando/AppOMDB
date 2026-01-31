@@ -15,9 +15,9 @@ final class DetailMovieViewController: UIViewController {
     }()
 
     private let contentView = UIView()
-    private let posterView: UIImageView = {
-        let v = UIImageView()
-        v.contentMode = .scaleAspectFit
+    private let posterView: AsyncImageView = {
+        let v = AsyncImageView()
+        v.imageContentMode = .scaleAspectFit
         v.translatesAutoresizingMaskIntoConstraints = false
         return v
     }()
@@ -55,8 +55,8 @@ final class DetailMovieViewController: UIViewController {
 
     private let viewModel: DetailMovieViewModel
 
-    init() {
-        self.viewModel = DetailMovieViewModel()
+    init(imdbID: String) {
+        self.viewModel = DetailMovieViewModel(imdbID: imdbID)
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -117,13 +117,19 @@ final class DetailMovieViewController: UIViewController {
             loadingIndicator.stopAnimating()
             scrollView.isHidden = false
             configure(with: detail)
+        case .error(let message):
+            loadingIndicator.stopAnimating()
+            scrollView.isHidden = true
+            showError(message) { [weak self] in
+                self?.navigationController?.popViewController(animated: true)
+            }
         }
     }
 
-    private func configure(with detail: String) {
-        titleLabel.text = detail
-        yearLabel.text = detail
-        plotLabel.text = detail
-        posterView.image = UIImage(systemName: "film")
+    private func configure(with detail: MovieDetail) {
+        titleLabel.text = detail.title
+        yearLabel.text = detail.year
+        plotLabel.text = detail.plot ?? "Sin descripción."
+        posterView.loadImage(from: detail.poster)
     }
 }

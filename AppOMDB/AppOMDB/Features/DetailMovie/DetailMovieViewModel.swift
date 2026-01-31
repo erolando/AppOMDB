@@ -8,7 +8,8 @@ import UIKit
 
 enum DetailMovieViewModelState {
     case loading
-    case loaded(String)
+    case loaded(MovieDetail)
+    case error(String)
 }
 
 final class DetailMovieViewModel {
@@ -24,8 +25,25 @@ final class DetailMovieViewModel {
         }
     }
 
+    let imdbID: String
+    let movieRepository: MoviesRepositoryProtocol
+    
+    init(imdbID: String, movieRepository: MoviesRepositoryProtocol = MoviesRepository()) {
+        self.imdbID = imdbID
+        self.movieRepository = movieRepository
+    }
+
+    /// Carga el detalle de la película.
     func loadDetail() {
         state = .loading
-        state = .loaded("Test Detail")
+        movieRepository.fetchMovieDetail(imdbID: imdbID) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let detail):
+                self.state = .loaded(detail)
+            case .failure(let err):
+                self.state = .error(err.localizedDescription)
+            }
+        }
     }
 }

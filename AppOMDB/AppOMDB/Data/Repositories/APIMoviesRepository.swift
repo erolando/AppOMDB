@@ -9,6 +9,8 @@ import Foundation
 
 protocol MoviesRepositoryProtocol {
     func searchMovies(query: String, completion: @escaping (Result<[Movie], Error>) -> Void)
+    func fetchMovieDetail(imdbID: String,
+                          completion: @escaping (Result<MovieDetail, Error>) -> Void)
 }
     final class MoviesRepository: MoviesRepositoryProtocol {
     
@@ -43,6 +45,28 @@ protocol MoviesRepositoryProtocol {
             switch result {
             case .success(let response):
                 completion(.success(response.search ?? []))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    func fetchMovieDetail(imdbID: String,
+                          completion: @escaping (Result<MovieDetail, Error>) -> Void) {
+
+        guard var components = URLComponents(string: baseURL) else {
+            print("Invalid URL")
+            return
+        }
+        components.queryItems = [
+            URLQueryItem(name: "apikey", value: apiKey),
+            URLQueryItem(name: "i", value: imdbID)
+        ]
+        
+        apiClient.request(components.url!) { (result: Result<MovieDetail, APIError>) in
+
+            switch result {
+            case .success(let response):
+                completion(.success(response))
             case .failure(let error):
                 completion(.failure(error))
             }
